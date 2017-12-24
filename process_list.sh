@@ -22,17 +22,18 @@ if [ "$list_file_size" == 0 ]; then
   exit 1
 fi
 
-cp list.txt list_orig.txt
+bkfile_name="`echo $list | cut -d '.' -f 1`"
+bkfile_ext="`echo $list | cut -d '.' -f 2`"
+cp $list ${bkfile_name}_orig.$bkfile_ext
 list_items="`cat $list`"
 for link in $list_items; do
   echo "Processing $link"
   ./hls_download.sh $link $quality
   script_status="$?"
   if [ "$script_status" == 0 ]; then
-    echo "Success! Removing URL from list...."
-    #cat list.txt | grep -v $link #> $list
-    #read -n1 -r -p "Press any key to continue..."
-    echo ""
+    echo -n "Success! Removing URL from list...."
+    echo "`cat $list | grep -v $link`" > $list
+    echo "Done!"
   else
     echo "Error processing list item: $script_status. Skipping to next item...."
   fi
