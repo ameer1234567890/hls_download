@@ -13,7 +13,7 @@ download_part(){
     curl -o $tmpdir/$partn --progress-bar $hlsq_path$part
     native_file_size="`stat --printf=\"%s\" $tmpdir/$partn 2> /dev/null`"
     if [ "$remote_file_size" == "" ]; then
-      remote_file_size="`echo \"$response\" | grep 'Content-Length' | awk '{print $2}'`"
+      remote_file_size="`echo \"$response\" | grep -i 'Content-Length' | awk '{print $2}'`"
     fi
   done
 }
