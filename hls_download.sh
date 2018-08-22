@@ -188,5 +188,4 @@ echo "Done!"
 printf "Cleaning up temporary files.... "
 sleep 1
 rm -rf "$tmpdir"
-rm "$filename" # DEBUG ------------------------------------------------------------------------------
 echo "Done!"
