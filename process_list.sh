@@ -2,6 +2,18 @@
 list="$1"
 quality="$2"
 
+check_tools(){
+  tools="./hls_download.sh"
+  for tool in $tools; do
+    if [ ! "$(command -v "$tool")" ]; then
+      printf "\e[1m%s\e[0m not found! Exiting....\n" "$tool"
+      exit 1
+    fi
+  done
+}
+
+check_tools
+
 if [ "$list" = "-h" ] || [ "$list" = "--help" ]; then
   echo "Usage: $0 LIST_FILE [low|high]"
   exit 0

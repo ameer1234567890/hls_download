@@ -2,6 +2,16 @@
 url="$1"
 quality="$2"
 
+check_tools(){
+  tools="curl ffmpeg"
+  for tool in $tools; do
+    if [ ! "$(command -v "$tool")" ]; then
+      printf "\e[1m%s\e[0m not found! Exiting....\n" "$tool"
+      exit 1
+    fi
+  done
+}
+
 download_part(){
   echo "Downloading $partn.... ($i/$num_parts)"
   j=0
@@ -18,6 +28,8 @@ download_part(){
     fi
   done
 }
+
+check_tools
 
 if [ "$url" = "-h" ] || [ "$url" = "--help" ]; then
   echo "Usage: $0 URL [high|low]"
