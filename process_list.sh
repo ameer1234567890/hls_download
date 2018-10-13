@@ -2,7 +2,7 @@
 list="$1"
 quality="$2"
 
-check_tools(){
+check_tools() {
   tools="./hls_download.sh"
   for tool in $tools; do
     if [ ! "$(command -v "$tool")" ]; then
@@ -29,7 +29,7 @@ if [ ! -f "$list" ]; then
   exit 1
 fi
 
-list_file_size="$(stat --printf="%s" "$list" 2> /dev/null)"
+list_file_size="$(stat --printf="%s" "$list" 2>/dev/null)"
 if [ "$list_file_size" -eq 0 ]; then
   echo "List is empty! Exiting...."
   exit 1
@@ -45,8 +45,8 @@ for link in $list_items; do
   script_status="$?"
   if [ "$script_status" -eq 0 ]; then
     printf "Success! Removing URL from list...."
-    new_list="$(< "$list" grep -v "$link")"
-    echo "$new_list" > "$list"
+    new_list="$(grep <"$list" -v "$link")"
+    echo "$new_list" >"$list"
     echo "Done!"
   else
     echo "Error processing list item: $script_status. Skipping to next item...."

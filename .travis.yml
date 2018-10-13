@@ -4,5 +4,9 @@ os:
   - linux
 install:
   - shellcheck --version
+  - go get -u mvdan.cc/sh/cmd/shfmt
 script:
   - shellcheck $TRAVIS_BUILD_DIR/hls_download.sh
+  - shellcheck $TRAVIS_BUILD_DIR/process_list.sh
+  - shfmt -i 2 -d -p -ci $TRAVIS_BUILD_DIR/hls_download.sh
+  - shfmt -i 2 -d -p -ci $TRAVIS_BUILD_DIR/process_list.sh

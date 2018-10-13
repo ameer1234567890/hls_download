@@ -2,7 +2,7 @@
 url="$1"
 quality="$2"
 
-check_tools(){
+check_tools() {
   tools="curl ffmpeg"
   for tool in $tools; do
     if [ ! "$(command -v "$tool")" ]; then
@@ -12,7 +12,7 @@ check_tools(){
   done
 }
 
-download_part(){
+download_part() {
   echo "Downloading $partn.... ($i/$num_parts)"
   j=0
   while [ "$native_file_size" != "$remote_file_size" ]; do
@@ -22,7 +22,7 @@ download_part(){
       exit 1
     fi
     curl -o "$tmpdir"/"$partn" --progress-bar "$hlsq_path""$part"
-    native_file_size="$(stat --printf="%s" "$tmpdir"/"$partn" 2> /dev/null)"
+    native_file_size="$(stat --printf="%s" "$tmpdir"/"$partn" 2>/dev/null)"
     if [ "$remote_file_size" = "" ]; then
       remote_file_size="$(echo "$response" | grep -i 'Content-Length' | awk '{print $2}')"
     fi
@@ -41,9 +41,9 @@ if [ "$url" = "" ]; then
   exit 1
 fi
 
-curl -I "$url" 2>/dev/null > url_check.txt
+curl -I "$url" 2>/dev/null >url_check.txt
 curl_status="$?"
-http_status="$(< url_check.txt head -n 1 | awk '{print $2}')"
+http_status="$(head <url_check.txt -n 1 | awk '{print $2}')"
 if [ "$curl_status" != 0 ]; then
   echo "cURL Error: $curl_status. Exiting...."
   rm url_check.txt
@@ -70,22 +70,22 @@ while [ "$tokens" = "" ]; do
   fi
   printf "Requesting video page.... "
   curl -o "$tmpdir"/page.html --silent "$url"
-  if [ "$(cat "$tmpdir"/page.html 2> /dev/null)" = "" ]; then
+  if [ "$(cat "$tmpdir"/page.html 2>/dev/null)" = "" ]; then
     echo "Invalid response! Exiting...."
     exit 1
   fi
-  has_tokens="$(< "$tmpdir"/page.html grep setVideoHLS | cut -d "'" -f 2 | grep '?')"
+  has_tokens="$(grep <"$tmpdir"/page.html setVideoHLS | cut -d "'" -f 2 | grep '?')"
   if [ "$has_tokens" = "" ]; then
     tokens=""
     echo "Failed!"
   else
-    tokens="$(< "$tmpdir"/page.html grep setVideoHLS | cut -d "'" -f 2 | cut -d '?' -f 2)"
+    tokens="$(grep <"$tmpdir"/page.html setVideoHLS | cut -d "'" -f 2 | cut -d '?' -f 2)"
     echo "Done!"
   fi
   sleep 2
 done
 
-hls_url="$(< "$tmpdir"/page.html grep setVideoHLS | cut -d "'" -f 2)"
+hls_url="$(grep <"$tmpdir"/page.html setVideoHLS | cut -d "'" -f 2)"
 if [ "$hls_url" = "" ]; then
   echo "No HLS sources found! Exiting...."
   exit 1
@@ -94,21 +94,21 @@ fi
 printf "Requesting available formats.... "
 curl -o "$tmpdir"/hls.m3u8 --silent "$hls_url"
 echo "Done!"
-if [ "$(cat "$tmpdir"/hls.m3u8 2> /dev/null)" = "" ]; then
+if [ "$(cat "$tmpdir"/hls.m3u8 2>/dev/null)" = "" ]; then
   echo "Format list is empty! Exiting...."
   exit 1
 fi
 
-< "$tmpdir"/hls.m3u8 grep hls- | cut -d '-' -f 2 | cut -d '.' -f 1 > "$tmpdir/"hlsq_list.txt
-if [ "$(cat "$tmpdir"/hlsq_list.txt 2> /dev/null)" = "" ]; then
+grep <"$tmpdir"/hls.m3u8 hls- | cut -d '-' -f 2 | cut -d '.' -f 1 >"$tmpdir/"hlsq_list.txt
+if [ "$(cat "$tmpdir"/hlsq_list.txt 2>/dev/null)" = "" ]; then
   echo "Format list (text) is empty! Exiting...."
   exit 1
 fi
 
 if [ "$quality" = "high" ]; then
-  hlsq_raw="$(< "$tmpdir"/hlsq_list.txt sort -g | tail -1)"
+  hlsq_raw="$(sort <"$tmpdir"/hlsq_list.txt -g | tail -1)"
 elif [ "$quality" = "low" ]; then
-  hlsq_raw="$(< "$tmpdir"/hlsq_list.txt sort -g | head -1)"
+  hlsq_raw="$(sort <"$tmpdir"/hlsq_list.txt -g | head -1)"
 fi
 
 if [ "$hlsq_raw" = "" ]; then
@@ -134,13 +134,13 @@ hlsq_url="$hlsq_path$hlsq"
 
 printf "Requesting HLS playlist.... "
 curl -o "$tmpdir"/"$hlsqf" --silent "$hlsq_url"
-if [ "$(cat "$tmpdir"/"$hlsqf" 2> /dev/null)" = "" ]; then
+if [ "$(cat "$tmpdir"/"$hlsqf" 2>/dev/null)" = "" ]; then
   echo "Failed! Exiting...."
   exit 1
 fi
 echo "Done!"
 
-parts="$(<"$tmpdir"/"$hlsqf" grep hls-)"
+parts="$(grep <"$tmpdir"/"$hlsqf" hls-)"
 num_parts="$(echo "$parts" | wc -w)"
 
 i=0
@@ -149,7 +149,7 @@ for part in $parts; do
   partn="$(echo "$part" | cut -d '?' -f 1)"
   response="$(curl -I --silent "$hlsq_path""$part")"
   remote_file_size="$(echo "$response" | grep 'Content-Length' | awk '{print $2}')"
-  native_file_size="$(stat --printf="%s" "$tmpdir"/"$partn" 2> /dev/null)"
+  native_file_size="$(stat --printf="%s" "$tmpdir"/"$partn" 2>/dev/null)"
   if [ "$native_file_size" = "" ]; then
     native_file_size="0"
   fi
