@@ -52,3 +52,6 @@ for link in $list_items; do
     echo "Error processing list item: $script_status. Skipping to next item...."
   fi
 done
+
+printf "Press enter to exit..."
+read -r
